@@ -38,25 +38,35 @@ workflow longReadAlignmentScattered {
     }
 
     scatter (readFile in readFiles) {
-        call extractReads_t.extractReads as extractReads {
-            input:
-                readFile=readFile,
-                referenceFasta=referenceFasta,
-                memSizeGB=4,
-                threadCount=4,
-                diskSizeGB=extractReadsDiskSize,
-                dockerImage="mobinasri/bio_base:v0.2"
+        # fastq.gz は readSetSplitter が展開しながら直接読むので extractReads
+        # （gunzip で非圧縮 fastq を丸ごと書き出す）を通さない。
+        # bam/cram 等それ以外は従来どおり extractReads で fastq にする。
+        String readBaseName = basename(readFile)
+        Boolean isFastqGz = sub(readBaseName, "\\.(fastq|fq)\\.gz$", "") != readBaseName
+
+        if (!isFastqGz) {
+            call extractReads_t.extractReads as extractReads {
+                input:
+                    readFile=readFile,
+                    referenceFasta=referenceFasta,
+                    memSizeGB=4,
+                    threadCount=4,
+                    diskSizeGB=extractReadsDiskSize,
+                    dockerImage="mobinasri/bio_base:v0.2"
+            }
         }
+        File readFastq = select_first([extractReads.extractedRead, readFile])
+        Int readFastqSizeGB = select_first([extractReads.fileSizeGB, ceil(size(readFile, "GB"))])
     }
 
    call arithmetic_t.sum as readSize {
         input:
-            integers=extractReads.fileSizeGB
+            integers=readFastqSizeGB
     }
 
     call readSetSplitter_t.readSetSplitter {
         input:
-            readFastqs = extractReads.extractedRead,
+            readFastqs = readFastq,
             splitNumber = splitNumber,
             diskSize = floor(readSize.value * 2.5)
     }

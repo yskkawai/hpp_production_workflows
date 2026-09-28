@@ -12,7 +12,8 @@ task readSetSplitter {
         Int memSize=16
         Int threadCount=8
         Int diskSize=1024
-        String dockerImage="tpesout/hpp_base:latest"
+        # pigz と split --filter が必要（tpesout/hpp_base には pigz が無い）
+        String dockerImage="mobinasri/bio_base:latest"
         Int preemptible=2
     }
     command <<<
@@ -27,10 +28,14 @@ task readSetSplitter {
         # to turn off echo do 'set +o xtrace'
         set -o xtrace
 
-        readsPerFile=$(cat ~{sep=" " readFastqs} | wc -l | awk '{print int($1/(4 * ~{splitNumber})) + 1}')
+        # 入力は gzip 圧縮のまま渡されることがあるので展開しながら読み
+        # （pigz -dc -f は非圧縮ならそのまま出す）、分割結果も gzip 圧縮で書く。
+        # 非圧縮の分割 fastq を書き出すとリード全量の数倍のディスクを消費するため。
+        # 出力名は xaa.fq.gz 等（aligner が ${fileBasename%.*.*} で xaa.bam にする）。
+        readsPerFile=$(pigz -dc -f ~{sep=" " readFastqs} | wc -l | awk '{print int($1/(4 * ~{splitNumber})) + 1}')
         linesPerFile=$(( readsPerFile * 4 ))
-        cat ~{sep=" " readFastqs} | split -l $linesPerFile  --additional-suffix ".split.fq"
-        for i in *.split.fq;do du -s -BG $i | sed 's/G.*//';done > outputsize.txt
+        pigz -dc -f ~{sep=" " readFastqs} | split -l $linesPerFile --filter='pigz -p~{threadCount} > $FILE.gz' --additional-suffix ".fq"
+        for i in *.fq.gz;do du -s -BG $i | sed 's/G.*//';done > outputsize.txt
     >>>
     runtime {
         docker: dockerImage
@@ -40,7 +45,7 @@ task readSetSplitter {
         preemptible : preemptible
     }
     output {
-        Array[File] splitReadFastqs = glob("*.split.fq")
+        Array[File] splitReadFastqs = glob("*.fq.gz")
         Array[Float] readSizes = read_lines("outputsize.txt")
     }
 }
