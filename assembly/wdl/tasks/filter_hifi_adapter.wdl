@@ -21,7 +21,7 @@ workflow filterReads{
                 memSizeGB=4,
                 threadCount=4,
                 diskSizeGB=fileExtractionDiskSizeGB,
-                dockerImage="tpesout/hpp_base:latest"
+                dockerImage="tpesout/hpp_base@sha256:2e21cc70c7e74e580ea4b9a6c406e6a801e10fbd916113ab53500f61d9eb3440"
         }
         call filterHiFiAdapter as filterAdapter {
             input:
@@ -66,7 +66,7 @@ task filterHiFiAdapter {
         Int threadCount=16
         Int diskSizeGB=128
         Int preemptible=1
-        String dockerImage="quay.io/masri2019/hpp_hifi_adapter_filt:latest"
+        String dockerImage="quay.io/masri2019/hpp_hifi_adapter_filt@sha256:c85cc6a7079f5ea56fe7665db5a624e746a4759179ab6143237e4c56b9f5bf41"
     }
     command <<<
         # Set the exit code of a pipeline to that of the rightmost command
@@ -116,7 +116,7 @@ task cutadapt {
         Int threadCount=16
         Int diskSizeGB=512
         Int preemptible=1
-        String dockerImage="quay.io/masri2019/hpp_hifi_adapter_filt:latest"
+        String dockerImage="quay.io/masri2019/hpp_hifi_adapter_filt@sha256:c85cc6a7079f5ea56fe7665db5a624e746a4759179ab6143237e4c56b9f5bf41"
     }
     command <<<
         # Set the exit code of a pipeline to that of the rightmost command

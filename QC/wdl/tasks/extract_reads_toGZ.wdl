@@ -32,7 +32,7 @@ task extractReadstoGZ {
         Int memSizeGB = 4
         Int threadCount = 8
         Int diskSizeGB = 128
-        String dockerImage = "mobinasri/bio_base:v0.3.0"
+        String dockerImage = "mobinasri/bio_base@sha256:67b4fba8c1bc9b414d6cb3bfe086304b321d9eeb770873492f079f19c321dfd6"
     }
 
 

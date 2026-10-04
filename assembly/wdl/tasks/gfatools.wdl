@@ -21,7 +21,7 @@ task phasedGFAs2Fasta {
         Int threadCount=8
         Int diskSizeGB=128
         Int preemptible=1
-        String dockerImage="quay.io/masri2019/hpp_hifiasm:latest"
+        String dockerImage="quay.io/masri2019/hpp_hifiasm@sha256:5fdb9b30fbebf1a9bf2ff2aca9004f06bb0fbea8d21de7cc4a25718acaa9e6f3"
     }
     command <<<
         # Set the exit code of a pipeline to that of the rightmost command

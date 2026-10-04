@@ -11,7 +11,7 @@ task tarGz {
         Int memSize=16
         Int threadCount=8
         Int diskSize=128
-        String dockerImage="mobinasri/bio_base:v0.1"
+        String dockerImage="mobinasri/bio_base@sha256:850c64a1812d83c8628d1b1016590d92908ad5b917115845590de2c1c73f4de8"
         Int preemptible=2
     }
     command <<<

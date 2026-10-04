@@ -32,7 +32,7 @@ task extractReads {
         Int memSizeGB = 4
         Int threadCount = 8
         Int diskSizeGB = 128
-        String dockerImage = "mobinasri/bio_base:dev-v0.1"
+        String dockerImage = "mobinasri/bio_base@sha256:ba69307a45d752eda9cdd3e8feee44d4b690049dda6e8938d4058ad2f8b150ea"
     }
 
 

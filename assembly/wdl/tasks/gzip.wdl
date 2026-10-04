@@ -10,7 +10,7 @@ task gzip {
         Int memSize=32
         Int threadCount=8
         Int diskSize=256
-        String dockerImage="quay.io/masri2019/hpp_hifiasm:latest"
+        String dockerImage="quay.io/masri2019/hpp_hifiasm@sha256:5fdb9b30fbebf1a9bf2ff2aca9004f06bb0fbea8d21de7cc4a25718acaa9e6f3"
         Int preemptible=2
     }
     command <<<
