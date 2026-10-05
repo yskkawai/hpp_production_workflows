@@ -73,12 +73,14 @@ workflow trioHifiasmAssembly {
         File binFilesTarGz          = trioHifiasm.outputBinFiles
         File paternalYak            = paternalYakCount.outputYak
         File maternalYak            = maternalYakCount.outputYak
+        Int homCovUsed              = trioHifiasm.homCovUsed
     }
 
     parameter_meta {
         childID: "Sample ID of the child sample whose reads are going to be assembled"
         childReadsHiFi: "An array of files (or a single file) that contain the HiFi reads of the child sample ( Acceptable formats are fastq (or fq), fastq.gz (or fq.gz), bam and cram)"
         inputBinFilesTarGz: "(optional) The hifiasm produces some bin files which can be saved and used for re-running the assembly process. By having these bin files hifiasm can skip the time-consuming process of finding overlaps (Acceptable format is .tar.gz)"
+        homCov: "(optional) Homozygous read coverage for hifiasm (--hom-cov). If omitted, the HiFi depth (total bases / genomeSizeGb) is used to size the memory of hifiasm step 1, and hifiasm's own estimate from step 1 (peak_hom) is used for the later steps"
         referenceFasta: "(optional) If any of the read files (can be either for child, father or mother) are having .cram format, the reference genome should be provided in .fasta format"
         threadCount: "The number of cores for running hifiasm"
         memSize: "The memory size (GB) for running hifiasm"

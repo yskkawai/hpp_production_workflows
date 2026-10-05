@@ -11,6 +11,7 @@ workflow runTrioHifiasm{
         Array[File] childReadsHiFi
         Array[File] childReadsONT=[]
         Int? homCov
+        Float genomeSizeGb = 3.1
         Int minOntReadLength=50000
         String childID
         String? hifiasmExtraOptions
@@ -51,6 +52,26 @@ workflow runTrioHifiasm{
 
     Float childReadHiFiSize = size(hifiProcessedFastqGz, 'GB')
 
+    # If homCov is not given, estimate the HiFi read depth (total bases / genome size)
+    # to size the memory of step 1. The --hom-cov value for the later steps is taken
+    # from hifiasm's own estimate in step 1 (peak_hom).
+    if (!defined(homCov)) {
+        scatter (fastqGz in hifiProcessedFastqGz) {
+            call countBases {
+                input:
+                    readFastqGz = fastqGz,
+                    dockerImage = dockerImage
+            }
+        }
+        call estimateDepth {
+            input:
+                baseCounts = countBases.bases,
+                genomeSizeGb = genomeSizeGb,
+                dockerImage = dockerImage
+        }
+    }
+    Int step1Cov = select_first([homCov, estimateDepth.depth])
+
 
     # if ONT reads are provided
     if (length(childReadsONT) != 0){
@@ -89,13 +110,16 @@ workflow runTrioHifiasm{
             homCov = homCov,
             childID=childID,
             extraOptions="--bin-only --telo-m CCCTAA",
-            memSizeGB=ceil(memCovRatios[0] * select_first([homCov, 0]) + offsetMem[0]),
+            memSizeGB=ceil(memCovRatios[0] * step1Cov + offsetMem[0]),
             threadCount=threadCount,
             diskSizeGB= floor((childReadHiFiSize + readULSize) * 2.5) + 64,
             preemptible=preemptible,
             dockerImage=dockerImage,
             zones = zones
     }
+    # homCov given by the user, otherwise hifiasm's estimate from step 1
+    Int homCovResolved = select_first([homCov, hifiasmStep1.peakHom])
+
     # If ONT (ultralong) reads are provided, run step2 and step3.
     # If not, skip them and run step4 directly using step1's bin files.
     if (length(childReadsONT) != 0) {
@@ -104,12 +128,12 @@ workflow runTrioHifiasm{
                 childReadsUL=ont_reads,
                 paternalYak=paternalYak,
                 maternalYak=maternalYak,
-                homCov = homCov,
+                homCov = homCovResolved,
                 minOntReadLength = minOntReadLength,
                 childID=childID,
                 extraOptions="--bin-only --telo-m CCCTAA",
                 inputBinFilesTarGz=hifiasmStep1.outputBinFiles,
-                memSizeGB=ceil(memCovRatios[1] * select_first([homCov, 0]) + offsetMem[1]),
+                memSizeGB=ceil(memCovRatios[1] * homCovResolved + offsetMem[1]),
                 threadCount=threadCount,
                 diskSizeGB= floor((childReadHiFiSize + readULSize) * 2.5) + 128,
                 preemptible=preemptible,
@@ -119,12 +143,12 @@ workflow runTrioHifiasm{
         call trioHifiasm as hifiasmStep3{
             input:
                 childReadsUL=ont_reads,
-                homCov = homCov,
+                homCov = homCovResolved,
                 minOntReadLength = minOntReadLength,
                 childID=childID,
                 extraOptions="--telo-m CCCTAA",
                 inputBinFilesTarGz=hifiasmStep2.outputBinFiles,
-                memSizeGB=ceil(memCovRatios[2] * select_first([homCov, 0]) + offsetMem[2]),
+                memSizeGB=ceil(memCovRatios[2] * homCovResolved + offsetMem[2]),
                 threadCount=threadCount,
                 diskSizeGB= floor((childReadHiFiSize + readULSize) * 2.5) + 128,
                 preemptible=preemptible,
@@ -139,11 +163,11 @@ workflow runTrioHifiasm{
             input:
                 paternalYak=paternalYak,
                 maternalYak=maternalYak,
-                homCov = homCov,
+                homCov = homCovResolved,
                 childID=childID,
                 extraOptions="--telo-m CCCTAA",
                 inputBinFilesTarGz=hifiasmStep1.outputBinFiles,
-                memSizeGB=ceil(memCovRatios[1] * select_first([homCov, 0]) + offsetMem[1]),
+                memSizeGB=ceil(memCovRatios[1] * homCovResolved + offsetMem[1]),
                 threadCount=threadCount,
                 diskSizeGB= floor((childReadHiFiSize + readULSize) * 2.5) + 128,
                 preemptible=preemptible,
@@ -159,6 +183,7 @@ workflow runTrioHifiasm{
         File outputMaternalContigGfa = select_first([hifiasmStep3.outputMaternalContigGfa, hifiasmStep4.outputMaternalContigGfa])
         File outputRawUnitigGfa = select_first([hifiasmStep3.outputRawUnitigGfa, hifiasmStep4.outputRawUnitigGfa])
         File outputBinFiles = select_first([hifiasmStep3.outputBinFiles, hifiasmStep4.outputBinFiles])
+        Int homCovUsed = homCovResolved
     }
 }
 
@@ -199,6 +224,9 @@ task trioHifiasm {
             rm -rf ~{inputBinFilesTarGz} || true
         fi
 
+        # keep a copy of hifiasm's log (stderr) to extract its coverage estimate
+        exec 2> >(tee -a hifiasm.log >&2)
+
         # make a fake fastq to use for step 2 and 3
         printf "@fake\nA\n+\nI\n" > fake.fq
 
@@ -212,7 +240,7 @@ task trioHifiasm {
                     -o ~{childID} \
                     --ul ~{sep="," childReadsUL} \
                     --ul-cut ~{minOntReadLength} \
-                    --hom-cov ~{homCov} \
+                    ~{if select_first([homCov, 0]) > 0 then "--hom-cov " + homCov else ""} \
                     -t~{threadCount} \
                     -1 ~{paternalYak} \
                     -2 ~{maternalYak} \
@@ -230,7 +258,7 @@ task trioHifiasm {
                     ~{extraOptions} \
                     -o ~{childID} \
                     --ul ~{sep="," childReadsUL} \
-                    --hom-cov ~{homCov} \
+                    ~{if select_first([homCov, 0]) > 0 then "--hom-cov " + homCov else ""} \
                     --ul-cut ~{minOntReadLength} \
                     --dual-scaf \
                     -t~{threadCount} \
@@ -246,7 +274,7 @@ task trioHifiasm {
                 hifiasm \
                     ~{extraOptions} \
                     -o ~{childID} \
-                    --hom-cov ~{homCov} \
+                    ~{if select_first([homCov, 0]) > 0 then "--hom-cov " + homCov else ""} \
                     --dual-scaf \
                     -t~{threadCount} \
                     -1 ~{paternalYak} \
@@ -261,6 +289,10 @@ task trioHifiasm {
                     ~{sep=" " childReadsHiFi}
             fi
         fi
+
+        # hifiasm's estimate of the homozygous k-mer peak (last value reported); 0 if absent
+        sed -n 's/^\[M::[a-z_]*\] peak_hom: \([0-9][0-9]*\);.*/\1/p' hifiasm.log | tail -n 1 > peak_hom.txt
+        [ -s peak_hom.txt ] || echo 0 > peak_hom.txt
 
         #Move bin and gfa files to saparate folders and compress them
         mkdir ~{childID}.raw_unitig_gfa
@@ -315,5 +347,54 @@ task trioHifiasm {
         File outputMaternalContigGfa = "~{childID}.mat.contig_gfa.tar.gz"
         File outputRawUnitigGfa = "~{childID}.raw_unitig_gfa.tar.gz"
         File outputBinFiles = "~{childID}.binFiles.tar.gz"
+        Int peakHom = read_int("peak_hom.txt")
+    }
+}
+
+task countBases {
+    input {
+        File readFastqGz
+        Int memSizeGB = 4
+        Int threadCount = 4
+        String dockerImage
+    }
+    command <<<
+        set -o pipefail
+        set -e
+        set -u
+        pigz -dc -p~{threadCount} ~{readFastqGz} | awk 'NR % 4 == 2 {s += length($0)} END {printf "%.0f\n", s}' > bases.txt
+    >>>
+    runtime {
+        docker: dockerImage
+        memory: memSizeGB + " GB"
+        cpu: threadCount
+        preemptible: 1
+    }
+    output {
+        Float bases = read_float("bases.txt")
+    }
+}
+
+task estimateDepth {
+    input {
+        Array[Float] baseCounts
+        Float genomeSizeGb
+        String dockerImage
+    }
+    command <<<
+        set -o pipefail
+        set -e
+        set -u
+        awk -v g=~{genomeSizeGb} '{s += $1} END {d = s / (g * 1e9); printf "%d\n", (d == int(d)) ? d : int(d) + 1}' ~{write_lines(baseCounts)} > depth.txt
+        echo "estimated HiFi depth: $(cat depth.txt)x" >&2
+    >>>
+    runtime {
+        docker: dockerImage
+        memory: "1 GB"
+        cpu: 1
+        preemptible: 1
+    }
+    output {
+        Int depth = read_int("depth.txt")
     }
 }
