@@ -17,7 +17,7 @@ task merge{
         Int memSize=32
         Int threadCount=8
         Int diskSize=256
-        String dockerImage="quay.io/masri2019/hpp_base:latest"
+        String dockerImage="quay.io/masri2019/hpp_base@sha256:aae1a6e9f57e98f1df04136b2b9eef68e618ee8f6ae9ed387c08cce5d6d2834d"
         Int preemptible=2
         String zones
     }

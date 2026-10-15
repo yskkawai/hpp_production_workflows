@@ -30,7 +30,7 @@ task extractReads {
         Int memSizeGB = 4
         Int threadCount = 8
         Int diskSizeGB = 512
-        String dockerImage = "tpesout/hpp_base:latest"
+        String dockerImage = "tpesout/hpp_base@sha256:2e21cc70c7e74e580ea4b9a6c406e6a801e10fbd916113ab53500f61d9eb3440"
     }
 
 

@@ -22,7 +22,7 @@ task applyPolish{
         String? HaplotypeLabel
         String GenotypeToPolish="2"
 
-        String dockerImage = "kishwars/pepper_deepvariant:r0.8"
+        String dockerImage = "kishwars/pepper_deepvariant@sha256:70908591ad67e8567a6e4551119b2cfc33d957ad39701c8af51b36b516214645"
         Int memSizeGB = 8
         Int threadCount = 8
         Int diskSizeGB = 8

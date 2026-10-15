@@ -19,7 +19,7 @@ task bcftoolsConcat {
         Int memSizeGB = 8
         Int threadCount = 4
         Int diskSizeGB = 50
-        String dockerImage = "kishwars/pepper_deepvariant:r0.8"
+        String dockerImage = "kishwars/pepper_deepvariant@sha256:70908591ad67e8567a6e4551119b2cfc33d957ad39701c8af51b36b516214645"
 
     }
     command <<<

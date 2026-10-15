@@ -20,7 +20,7 @@ task max {
     }
 
     runtime {
-        docker: "tpesout/hpp_base:latest"
+        docker: "tpesout/hpp_base@sha256:2e21cc70c7e74e580ea4b9a6c406e6a801e10fbd916113ab53500f61d9eb3440"
     }
 }
 
@@ -38,7 +38,7 @@ task sum {
     }
 
     runtime {
-        docker: "tpesout/hpp_base:latest"
+        docker: "tpesout/hpp_base@sha256:2e21cc70c7e74e580ea4b9a6c406e6a801e10fbd916113ab53500f61d9eb3440"
         preemptible: 1
     }
 }

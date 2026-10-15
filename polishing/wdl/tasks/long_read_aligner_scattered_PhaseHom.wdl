@@ -34,7 +34,7 @@ workflow longReadAlignmentScattered {
         Int preemptible=2
         Int extractReadsDiskSize=512
         String zones="us-west2-a"
-        String dockerImage="mobinasri/long_read_aligner:v0.2"
+        String dockerImage="mobinasri/long_read_aligner@sha256:112dd1ac06a2712337a35a3242eb7546e234dd607da148d7802c7b1f22df84be"
     }
 
     scatter (readFile in readFiles) {
@@ -52,7 +52,7 @@ workflow longReadAlignmentScattered {
                     memSizeGB=4,
                     threadCount=4,
                     diskSizeGB=extractReadsDiskSize,
-                    dockerImage="mobinasri/bio_base:v0.2"
+                    dockerImage="mobinasri/bio_base@sha256:754dff1951733968d71a71b40302c8e2480d42426ac6a613b98a7a23a8734ae2"
             }
         }
         File readFastq = select_first([extractReads.extractedRead, readFile])

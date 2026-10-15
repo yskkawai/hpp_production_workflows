@@ -13,7 +13,7 @@ task readSetSplitter {
         Int threadCount=8
         Int diskSize=1024
         # pigz と split --filter が必要（tpesout/hpp_base には pigz が無い）
-        String dockerImage="mobinasri/bio_base:latest"
+        String dockerImage="mobinasri/bio_base@sha256:8f724fbb8801e3a8e73dfa8bcabebd9188d769db5e3343cd6763218d266e1063"
         Int preemptible=2
     }
     command <<<

@@ -26,7 +26,7 @@ workflow FilterShortReads {
                     memSizeGB=4,
                     threadCount=4,
                     diskSizeGB=ceil(3 * size(readFile, "GB")) + 64,
-                    dockerImage="mobinasri/bio_base:v0.2"
+                    dockerImage="mobinasri/bio_base@sha256:754dff1951733968d71a71b40302c8e2480d42426ac6a613b98a7a23a8734ae2"
             }
         }
         File readFastq = select_first([extractReads.extractedRead, readFile])
@@ -55,7 +55,7 @@ task filterShortReads {
         Int threadCount=4
         Int diskSizeGB=512
         Int preemptible=1
-        String dockerImage="mobinasri/bio_base:latest"
+        String dockerImage="mobinasri/bio_base@sha256:8f724fbb8801e3a8e73dfa8bcabebd9188d769db5e3343cd6763218d266e1063"
     }
     command <<<
         set -o pipefail

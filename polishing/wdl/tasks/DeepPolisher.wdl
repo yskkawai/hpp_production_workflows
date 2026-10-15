@@ -14,7 +14,7 @@ workflow runDeepPolisher {
         File Fasta
         File ModelFilesTarGZ
         String sampleName
-        String dockerImage="google/deepconsensus:polisher_v0.0.8_12122023"
+        String dockerImage="google/deepconsensus@sha256:d8768adf028224f3a0deb23a63169ff531b462fdccebe4f9069ce0e69bba7c40"
         Boolean useOptimalGQFilter=true
         String customGQFilter=""
     }
@@ -108,7 +108,7 @@ task DPPostProcess{
 
         String customGQFilter=""
         Boolean useOptimalGQFilter=true
-        String dockerImage = "miramastoras/polishing:latest"
+        String dockerImage = "miramastoras/polishing@sha256:0c21a02ffc00725568db4043de223474c7be57fe4f677a4c3c4355f6dab408b4"
         Int memSizeGB = 128
         Int threadCount = 8
         Int diskSizeGB = 128

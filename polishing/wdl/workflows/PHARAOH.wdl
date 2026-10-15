@@ -71,7 +71,7 @@ workflow PHARAOH{
             diskSize=512,
             threadCount=32,
             kmerSize=19,
-            dockerImage="mobinasri/long_read_aligner:v0.3.3"
+            dockerImage="mobinasri/long_read_aligner@sha256:c24266cfcbe46fadca9fcbeacc26c357ee792577b54149961c5413bb73cfe8c8"
     }
 
     ## Get Homozygous regions between the two haplotypes
@@ -102,7 +102,7 @@ workflow PHARAOH{
             kmerSize=PharaohKmerSize,
             sampleSuffix="all2hap1",
             options=hifiAlignmentOptions,
-            dockerImage="mobinasri/long_read_aligner:v0.3.3"
+            dockerImage="mobinasri/long_read_aligner@sha256:c24266cfcbe46fadca9fcbeacc26c357ee792577b54149961c5413bb73cfe8c8"
     }
 
     call long_read_aligner_scattered_t.longReadAlignmentScattered as alignAllToHap2Scattered{
@@ -115,7 +115,7 @@ workflow PHARAOH{
             sampleName=sampleName,
             sampleSuffix="all2hap2",
             options=hifiAlignmentOptions,
-            dockerImage="mobinasri/long_read_aligner:v0.3.3"
+            dockerImage="mobinasri/long_read_aligner@sha256:c24266cfcbe46fadca9fcbeacc26c357ee792577b54149961c5413bb73cfe8c8"
     }
 
     ## remove reads with de > 0.02
@@ -124,7 +124,7 @@ workflow PHARAOH{
             Bam=alignAllToHap1Scattered.bamFile,
             options="--maxDiv 0.02",
             suffix="maxDiv.02",
-            dockerImage="mobinasri/secphase:dev-v0.2.0-hom"
+            dockerImage="mobinasri/secphase@sha256:357e5f954fe754699c192b4f6c366886e5236a7ee8f10c7e01068aceef0eb25f"
 
     }
 
@@ -133,7 +133,7 @@ workflow PHARAOH{
             Bam=alignAllToHap2Scattered.bamFile,
             options="--maxDiv 0.02",
             suffix="maxDiv.02",
-            dockerImage="mobinasri/secphase:dev-v0.2.0-hom"
+            dockerImage="mobinasri/secphase@sha256:357e5f954fe754699c192b4f6c366886e5236a7ee8f10c7e01068aceef0eb25f"
 
     }
 

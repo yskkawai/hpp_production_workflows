@@ -24,7 +24,7 @@ task WhatsHapPhase {
         File bamFileIdx
         String outPrefix
 
-        String dockerImage = "tpesout/whatshap:latest"
+        String dockerImage = "tpesout/whatshap@sha256:cbb945400b20c9a666cb9ec6c111eca710a53f386ff77083fe676fd22c7cbe84"
         Int memSizeGB = 128
         Int threadCount =16
         Int diskSizeGB = 256

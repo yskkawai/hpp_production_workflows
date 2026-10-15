@@ -26,7 +26,7 @@ workflow longReadAlignment {
                 memSizeGB=4,
                 threadCount=4,
                 diskSizeGB=extractReadsDiskSize,
-                dockerImage="tpesout/hpp_base:latest"
+                dockerImage="tpesout/hpp_base@sha256:2e21cc70c7e74e580ea4b9a6c406e6a801e10fbd916113ab53500f61d9eb3440"
         }
 
          ## align reads to the assembly
@@ -77,7 +77,7 @@ task alignmentBam{
         Int memSize=64
         Int threadCount=8
         Int diskSize
-        String dockerImage="quay.io/masri2019/hpp_long_read_aligner:latest"
+        String dockerImage="quay.io/masri2019/hpp_long_read_aligner@sha256:82fff99acea59123842172ea0febf31f133f43534f57d14b80d6c4a3c74f3cba"
         Int preemptible=2
         String zones="us-west2-a"
     }
@@ -145,7 +145,7 @@ task alignmentPaf{
         Int memSize=64
         Int threadCount=32
         Int diskSize
-        String dockerImage="mobinasri/long_read_aligner:v0.3.3"
+        String dockerImage="mobinasri/long_read_aligner@sha256:c24266cfcbe46fadca9fcbeacc26c357ee792577b54149961c5413bb73cfe8c8"
         Int preemptible=2
         String zones="us-west2-a"
     }

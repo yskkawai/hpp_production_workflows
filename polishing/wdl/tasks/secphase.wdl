@@ -7,7 +7,7 @@ workflow runSecPhase {
         File? phasedVcf
         File? variantBed
         String secphaseOptions = "--hifi"
-        String secphaseDockerImage = "mobinasri/secphase:v0.4.3"
+        String secphaseDockerImage = "mobinasri/secphase@sha256:62b87493cd40dcac99aed7e0522ec7613e6489872fc86f99e395c7938f65f45d"
         String version = "v0.4.3"
     }
     call sortByName {
@@ -53,7 +53,7 @@ task secphase {
         Int memSize=32
         Int threadCount=8
         Int diskSize=128
-        String dockerImage="mobinasri/secphase:v0.4.3"
+        String dockerImage="mobinasri/secphase@sha256:62b87493cd40dcac99aed7e0522ec7613e6489872fc86f99e395c7938f65f45d"
         Int preemptible=2
         String zones="us-west2-a"
     }
@@ -115,7 +115,7 @@ task sortByName {
         Int memSize=16
         Int threadCount=8
         Int diskSize=1024
-        String dockerImage="mobinasri/secphase:v0.4.3"
+        String dockerImage="mobinasri/secphase@sha256:62b87493cd40dcac99aed7e0522ec7613e6489872fc86f99e395c7938f65f45d"
         Int preemptible=2
         String zones="us-west2-a"
     }

@@ -28,7 +28,7 @@ task marginPhase {
 
         File? configFile # if config file is passed in, it will override HifiOrONT
 
-        String dockerImage = "miramastoras/marginphase_sv:latest"
+        String dockerImage = "miramastoras/marginphase_sv@sha256:965a5ce954279c349fa579721b20e490db5fa8ed4d2b7438a6e2c5afc89785ae"
         Int threads = 32
         Int memSizeGb = 128
         Int diskSizeGb = 256

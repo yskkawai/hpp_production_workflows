@@ -23,7 +23,7 @@ workflow hprc_DeepPolisher {
         Array[File] ONTReads
         Array[File] HifiReads
 
-        String DeepPolisherDocker="google/deepconsensus:polisher_v0.0.8_12122023"
+        String DeepPolisherDocker="google/deepconsensus@sha256:d8768adf028224f3a0deb23a63169ff531b462fdccebe4f9069ce0e69bba7c40"
         String sampleName
         Boolean useMargin=false
 
@@ -66,7 +66,7 @@ workflow hprc_DeepPolisher {
           kmerSize=alignerHiFiKmerSize,
           sampleName=sampleName,
           options="--cs --eqx -L -Y -I8g",
-          dockerImage="mobinasri/long_read_aligner:v0.3.3",
+          dockerImage="mobinasri/long_read_aligner@sha256:c24266cfcbe46fadca9fcbeacc26c357ee792577b54149961c5413bb73cfe8c8",
           sampleSuffix="hifi.to.diploid.asm"
     }
 
@@ -80,7 +80,7 @@ workflow hprc_DeepPolisher {
           kmerSize=alignerONTKmerSize,
           sampleName=sampleName,
           options="--cs --eqx -L -Y",
-          dockerImage="mobinasri/long_read_aligner:v0.3.3",
+          dockerImage="mobinasri/long_read_aligner@sha256:c24266cfcbe46fadca9fcbeacc26c357ee792577b54149961c5413bb73cfe8c8",
           sampleSuffix="ONT.to.Hap1.asm"
     }
 
@@ -94,7 +94,7 @@ workflow hprc_DeepPolisher {
           kmerSize=alignerONTKmerSize,
           sampleName=sampleName,
           options="--cs --eqx -L -Y",
-          dockerImage="mobinasri/long_read_aligner:v0.3.3",
+          dockerImage="mobinasri/long_read_aligner@sha256:c24266cfcbe46fadca9fcbeacc26c357ee792577b54149961c5413bb73cfe8c8",
           sampleSuffix="ONT.to.Hap2.asm"
     }
 
