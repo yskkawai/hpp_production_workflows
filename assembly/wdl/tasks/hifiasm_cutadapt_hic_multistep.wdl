@@ -84,18 +84,23 @@ workflow runHiCHifiasm{
     Float readULSize = select_first([ul_size_all, 0])    
 
 
-    call hicHifiasm as hifiasmStep1{
-        input:
-            childReadsHiFi=hifiProcessedFastqGz,
-            homCov = homCov,
-            childID=childID,
-            extraOptions="--bin-only --telo-m CCCTAA",
-            memSizeGB=ceil(memCovRatios[0] * select_first([homCov, 0]) + offsetMem[0]),
-            threadCount=threadCount,
-            diskSizeGB= floor((childReadHiFiSize + readULSize) * 2.5) + 64,
-            preemptible=preemptible,
-            dockerImage=dockerImage,
-            zones = zones
+    # If bin files from an earlier run of the same HiFi reads are given, skip step 1
+    # (error correction and overlaps; independent of homCov) and start from step 2.
+    # Step 2 keeps only *.ec.bin and *.ovlp.*.bin, so UL/Hi-C bins are rebuilt.
+    if (!defined(inputBinFilesTarGz)) {
+        call hicHifiasm as hifiasmStep1{
+            input:
+                childReadsHiFi=hifiProcessedFastqGz,
+                homCov = homCov,
+                childID=childID,
+                extraOptions="--bin-only --telo-m CCCTAA",
+                memSizeGB=ceil(memCovRatios[0] * select_first([homCov, 0]) + offsetMem[0]),
+                threadCount=threadCount,
+                diskSizeGB= floor((childReadHiFiSize + readULSize) * 2.5) + 64,
+                preemptible=preemptible,
+                dockerImage=dockerImage,
+                zones = zones
+        }
     }
     call hicHifiasm as hifiasmStep2{
         input:
@@ -104,7 +109,7 @@ workflow runHiCHifiasm{
             minOntReadLength = minOntReadLength,
             childID=childID,
             extraOptions="--bin-only --telo-m CCCTAA",
-            inputBinFilesTarGz=hifiasmStep1.outputBinFiles,
+            inputBinFilesTarGz=select_first([inputBinFilesTarGz, hifiasmStep1.outputBinFiles]),
             memSizeGB=ceil(memCovRatios[1] * select_first([homCov, 0]) + offsetMem[1]),
             threadCount=threadCount,
             diskSizeGB= floor((childReadHiFiSize + readULSize) * 2.5) + 128,
