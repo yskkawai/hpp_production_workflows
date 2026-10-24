@@ -5,7 +5,9 @@ import "../tasks/mitoHiFi.wdl" as mitoHiFi_wf
 import "../../../QC/wdl/workflows/FCS.wdl" as fcs_wf
 import "../../../QC/wdl/tasks/findMitoContigs.wdl" as findMito_wf
 import "../../../QC/wdl/tasks/dropFastaContigs.wdl" as dropContigs_wf
-import "https://raw.githubusercontent.com/biomonika/HPP/14474a7ac061e6f1aa7faa1d9ea19217a3efe8d1/assembly/wdl/workflows/evaluateHumanAssembly.wdl" as evaluateHumanAssembly_wf
+## Local copy of biomonika/HPP@14474a7 assembly/wdl/workflows/evaluateHumanAssembly.wdl
+## (offline clusters cannot fetch remote imports)
+import "evaluateHumanAssembly.wdl" as evaluateHumanAssembly_wf
 import "../tasks/len_filter_fasta.wdl" as filter_fasta_t
 import "../tasks/renameContigsAddMT.wdl" as renameContigsAddMito
 
